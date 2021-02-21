@@ -5,6 +5,7 @@ import Admin from './pages/Admin'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
+import './app.css'
 
 function App() {
   return (
