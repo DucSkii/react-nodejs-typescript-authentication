@@ -99,6 +99,30 @@ app.get("/user", (req: Request, res: Response) => {
   res.send(req.user)
 })
 
+app.post("/deleteuser", async (req, res) => {
+  const { id } = req?.body
+  await User.findByIdAndDelete(id, null, (err: Error) => {
+    if (err) throw err
+  })
+  res.send("User Deleted")
+})
+
+app.get("/getallusers", async (req, res) => {
+  await User.find({}, (err: Error, data: any) => {
+    if (err) throw err
+    const filteredUsers: any = []
+    data.forEach((item: any) => {
+      const userInformation = {
+        username: item.username,
+        isAdmin: item.isAdmin,
+        id: item._id,
+      }
+      filteredUsers.push(userInformation)
+    })
+    res.send(filteredUsers)
+  })
+})
+
 // SERVER START
 app.listen(4000, () => {
   console.log("Server has started")
