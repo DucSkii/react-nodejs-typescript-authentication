@@ -18,8 +18,11 @@ const Admin = () => {
   }, [ctx])
 
   const deleteUser = (e: any) => {
+    if (e.getAttribute('data-admin') === 'true') {
+      return console.log("User is an admin")
+    }
     axios.post('http://localhost:4000/deleteuser', {
-      id: e.value
+      id: e.id
     }, {
       withCredentials: true,
     }).then(res => {
@@ -33,7 +36,7 @@ const Admin = () => {
         <div style={{ display: 'flex' }} key={id}>
           <div style={{ marginRight: '20px' }}>Username: {user.username}</div>
           <div style={{ marginRight: '20px' }}>Admin: {String(user.isAdmin)}</div>
-          <button value={user.id} onClick={e => deleteUser(e.target)}>Delete User</button>
+          <button id={user.id} data-admin={user.isAdmin} onClick={e => deleteUser(e.target)}>Delete User</button>
         </div>
       )
     })
@@ -48,7 +51,7 @@ const Admin = () => {
       <h1 style={{ margin: '3vh 0' }}>Admin</h1>
       {users.length ? (
         <>
-          { renderUsers()}
+          {renderUsers()}
         </>
       ) : (
           <div>

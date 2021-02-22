@@ -1,6 +1,6 @@
 // IMPORTS
 import mongoose, { Error } from 'mongoose'
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import cors from 'cors'
 import session from 'express-session'
 import passport from 'passport'
@@ -64,6 +64,22 @@ passport.deserializeUser((id: string, cb) => {
   })
 })
 
+const isAdminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const { user }: any = req
+  if (user) {
+    User.findOne({ username: user.username }, (err: Error, doc: UserInterface) => {
+      if (err) throw err
+      if (doc?.isAdmin) {
+        next()
+      } else {
+        res.send("Sorry, only admin's can perform this action")
+      }
+    })
+  } else {
+    res.send("Sorry, you must be logged in to perform this action")
+  }
+}
+
 // ROUTES
 app.post("/register", async (req, res) => {
   const { username, password } = req?.body
@@ -99,7 +115,7 @@ app.get("/user", (req: Request, res: Response) => {
   res.send(req.user)
 })
 
-app.post("/deleteuser", async (req, res) => {
+app.post("/deleteuser", isAdminMiddleware, async (req, res) => {
   const { id } = req?.body
   await User.findByIdAndDelete(id, null, (err: Error) => {
     if (err) throw err
@@ -107,7 +123,7 @@ app.post("/deleteuser", async (req, res) => {
   res.send("User Deleted")
 })
 
-app.get("/getallusers", async (req, res) => {
+app.get("/getallusers", isAdminMiddleware, async (req, res) => {
   await User.find({}, (err: Error, data: any) => {
     if (err) throw err
     const filteredUsers: any = []
