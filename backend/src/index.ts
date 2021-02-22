@@ -87,7 +87,12 @@ app.post("/register", async (req, res) => {
 })
 
 app.post("/login", passport.authenticate("local"), (req: Request, res: Response) => {
-  res.send("Successfully Logged In")
+  res.send("success")
+})
+
+app.get("/logout", (req, res) => {
+  req.logout()
+  res.send('Logged Out')
 })
 
 app.get("/user", (req: Request, res: Response) => {

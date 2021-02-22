@@ -1,38 +1,36 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 
-const Login = () => {
+const Register = () => {
 
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
 
-  const login = (e: any) => {
+  const register = (e: any) => {
     e.preventDefault()
-    axios.post('http://localhost:4000/login', {
+    axios.post('http://localhost:4000/register', {
       username,
       password,
     }, {
       withCredentials: true,
     }).then((res) => {
       console.log(res.data)
-      if (res.data === "success") {
-        window.location.href = '/'
-      }
-    }, () => {
-      console.log('failed')
+      setUsername('')
+      setPassword('')
+      alert("Successfully signed up")
     })
   }
 
   return (
     <div style={{ width: '100vw', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h1 style={{ margin: '3vh 0px' }}>Login</h1>
-      <form onSubmit={login}>
+      <h1 style={{ margin: '3vh 0' }}>Register</h1>
+      <form onSubmit={register}>
         <input placeholder='Username' required value={username} onChange={e => setUsername(e.target.value)} />
         <input placeholder='Password' required value={password} onChange={e => setPassword(e.target.value)} />
-        <button type='submit'>Login</button>
+        <button type='submit'>Register</button>
       </form>
     </div>
   )
 }
 
-export default Login
+export default Register
