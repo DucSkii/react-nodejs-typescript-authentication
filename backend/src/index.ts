@@ -6,21 +6,21 @@ import session from 'express-session'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import bcrypt from 'bcryptjs'
-import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import User from './User'
-import { UserInterface } from './Interfaces/UserInterface'
+import { DatabaseInterface, UserInterface } from './Interfaces/UserInterface'
 
-mongoose.connect("mongodb+srv://ducskii:admin@cluster0.wdo3b.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", {
+const LocalStrategy = passportLocal.Strategy
+
+mongoose.connect('mongodb+srv://ducskii:admin@cluster0.wdo3b.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', {
   useCreateIndex: true,
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}, (err: Error) => {
+}, (err) => {
   if (err) throw err
   console.log("Connected to Mongo")
 })
 
-const LocalStrategy = passportLocal.Strategy
 
 // MIDDLEWARE
 const app = express()
@@ -37,11 +37,11 @@ app.use(cookieParser())
 app.use(passport.initialize())
 app.use(passport.session())
 
-passport.use(new LocalStrategy((username, password, done) => {
+passport.use(new LocalStrategy((username: string, password: string, done) => {
   User.findOne({ username: username }, (err: Error, user: any) => {
     if (err) throw err
     if (!user) return done(null, false)
-    bcrypt.compare(password, user.password, (err, result) => {
+    bcrypt.compare(password, user.password, (err, result: boolean) => {
       if (result === true) {
         return done(null, user)
       } else {
@@ -51,12 +51,12 @@ passport.use(new LocalStrategy((username, password, done) => {
   })
 }))
 
-passport.serializeUser((user: any, cb) => {
-  cb(null, user.id)
+passport.serializeUser((user: DatabaseInterface, cb) => {
+  cb(null, user._id)
 })
 passport.deserializeUser((id: string, cb) => {
-  User.findOne({ _id: id }, (err: Error, user: any) => {
-    const userInformation = {
+  User.findOne({ _id: id }, (err: Error, user: DatabaseInterface) => {
+    const userInformation: UserInterface = {
       username: user.username,
       isAdmin: user.isAdmin,
       id: user._id,
@@ -68,7 +68,7 @@ passport.deserializeUser((id: string, cb) => {
 const isAdminMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const { user }: any = req
   if (user) {
-    User.findOne({ username: user.username }, (err: Error, doc: UserInterface) => {
+    User.findOne({ username: user.username }, (err: Error, doc: DatabaseInterface) => {
       if (err) throw err
       if (doc?.isAdmin) {
         next()
@@ -89,7 +89,7 @@ app.post("/register", async (req, res) => {
     return
   }
   const hashedPassword = await bcrypt.hash(password, 10)
-  User.findOne({ username }, async (err: Error, doc: UserInterface) => {
+  User.findOne({ username }, async (err: Error, doc: DatabaseInterface) => {
     if (err) throw err
     if (doc) res.send("User Already Exists")
     if (!doc) {
@@ -118,17 +118,17 @@ app.get("/user", (req: Request, res: Response) => {
 
 app.post("/deleteuser", isAdminMiddleware, async (req, res) => {
   const { id } = req?.body
-  await User.findByIdAndDelete(id, null, (err: Error) => {
+  await User.findByIdAndDelete(id, null, (err) => {
     if (err) throw err
   })
   res.send("User Deleted")
 })
 
 app.get("/getallusers", isAdminMiddleware, async (req, res) => {
-  await User.find({}, (err: Error, data: any) => {
+  await User.find({}, (err, data: DatabaseInterface[]) => {
     if (err) throw err
-    const filteredUsers: any = []
-    data.forEach((item: any) => {
+    const filteredUsers: UserInterface[] = []
+    data.forEach((item: DatabaseInterface) => {
       const userInformation = {
         username: item.username,
         isAdmin: item.isAdmin,
