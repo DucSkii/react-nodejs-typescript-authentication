@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 const Register = () => {
 
@@ -13,8 +13,7 @@ const Register = () => {
       password,
     }, {
       withCredentials: true,
-    }).then((res) => {
-      console.log(res.data)
+    }).then((res: AxiosResponse) => {
       setUsername('')
       setPassword('')
       alert("Successfully signed up")

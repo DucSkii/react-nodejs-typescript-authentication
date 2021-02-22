@@ -58,7 +58,8 @@ passport.deserializeUser((id: string, cb) => {
   User.findOne({ _id: id }, (err: Error, user: any) => {
     const userInformation = {
       username: user.username,
-      isAdmin: user.isAdmin
+      isAdmin: user.isAdmin,
+      id: user._id,
     }
     cb(err, userInformation)
   })

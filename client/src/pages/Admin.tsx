@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { myContext } from '../Context'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
+import { UserInterface } from '../interfaces/interfaces'
 
 const Admin = () => {
-  const [users, setUsers] = useState<any>([])
   const ctx = useContext(myContext)
+  const [users, setUsers] = useState<UserInterface[]>()
 
   useEffect(() => {
     axios.get("http://localhost:4000/getallusers", {
       withCredentials: true,
-    }).then((res) => {
-      setUsers(res.data.filter((user: any) => {
+    }).then((res: AxiosResponse) => {
+      setUsers(res.data.filter((user: UserInterface) => {
         return user.username !== ctx.username
       }
       ))
@@ -18,20 +19,27 @@ const Admin = () => {
   }, [ctx])
 
   const deleteUser = (e: any) => {
+    let userId: string;
+    userId = e.id
     if (e.getAttribute('data-admin') === 'true') {
       return console.log("User is an admin")
     }
     axios.post('http://localhost:4000/deleteuser', {
-      id: e.id
+      id: userId
     }, {
       withCredentials: true,
-    }).then(res => {
+    }).then((res: AxiosResponse) => {
       console.log(res.data)
     })
   }
 
+
+  if (!users) {
+    return null
+  }
+
   const renderUsers = () => {
-    return users.map((user: any, id: any) => {
+    return users.map((user: UserInterface, id: number) => {
       return (
         <div style={{ display: 'flex' }} key={id}>
           <div style={{ marginRight: '20px' }}>Username: {user.username}</div>
@@ -40,10 +48,6 @@ const Admin = () => {
         </div>
       )
     })
-  }
-
-  if (!users) {
-    return null
   }
 
   return (

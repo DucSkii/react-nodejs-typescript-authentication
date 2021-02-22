@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 const Login = () => {
 
@@ -13,13 +13,13 @@ const Login = () => {
       password,
     }, {
       withCredentials: true,
-    }).then((res) => {
+    }).then((res: AxiosResponse) => {
       console.log(res.data)
       if (res.data === "success") {
         window.location.href = '/'
       }
     }, () => {
-      console.log('failed')
+      console.log('Failed')
     })
   }
 
